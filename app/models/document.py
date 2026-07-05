@@ -37,3 +37,14 @@ class Document(Base):
         "Project",
         back_populates="documents"
     )
+
+    status = Column(
+        String(20),
+        default="uploaded"
+    )
+
+    chunks = relationship(
+        "DocumentChunk",
+        back_populates="document",
+        cascade="all, delete-orphan"
+    )
