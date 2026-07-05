@@ -3,12 +3,15 @@ from sqlalchemy import text
 import app.models
 from app.api.v1.auth import router as auth_router
 from app.db.database import engine
+from app.api.v1.users import router as user_router
+
 
 app = FastAPI(
     title="Inquira",
     version="1.0.0"
 )
 app.include_router(auth_router)
+app.include_router(user_router)
 
 @app.get("/")
 def root():
