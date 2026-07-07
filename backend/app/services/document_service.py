@@ -44,3 +44,27 @@ class DocumentService:
         )
 
         return DocumentRepository.create(db, document)
+    @staticmethod
+    def get_documents(db: Session, project_id: int):
+        return DocumentRepository.get_by_project(
+            db,
+            project_id
+        )
+
+
+    @staticmethod
+    def delete_document(db: Session, document_id: int):
+
+        document = DocumentRepository.get_by_id(
+            db,
+            document_id
+        )
+
+        if not document:
+            raise ValueError("Document not found")
+
+        DocumentRepository.delete(db, document)
+
+        return {
+            "message": "Document deleted successfully"
+        }

@@ -14,3 +14,13 @@ class ProjectRepository:
     @staticmethod
     def get_all_by_user(db: Session, owner_id: int):
         return db.query(Project).filter(Project.owner_id == owner_id).all()
+    
+    @staticmethod
+    def get_by_id(db: Session, project_id: int):
+        return (
+            db.query(Project)
+            .filter(Project.id == project_id)
+            .first()
+        )
+    
+    

@@ -13,8 +13,10 @@ def get_current_user(
     token: str = Depends(oauth2_scheme),
     db: Session = Depends(get_db)
 ):
+    print("TOKEN RECEIVED:", token)
 
     payload = decode_access_token(token)
+    print("PAYLOAD:", payload)
 
     if payload is None:
         raise HTTPException(
@@ -23,8 +25,10 @@ def get_current_user(
         )
 
     email = payload.get("sub")
+    print("EMAIL:", email)
 
     user = db.query(User).filter(User.email == email).first()
+    print("USER:", user)
 
     if user is None:
         raise HTTPException(

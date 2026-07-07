@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -36,3 +36,30 @@ def get_projects(
         db=db,
         owner_id=current_user.id
     )
+
+@router.get("/{project_id}", response_model=ProjectResponse)
+def get_project(
+    project_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+
+    try:
+        project = ProjectService.get_project(
+            db=db,
+            project_id=project_id
+        )
+
+        if project.owner_id != current_user.id:
+            raise HTTPException(
+                status_code=403,
+                detail="Access denied"
+            )
+
+        return project
+
+    except ValueError as e:
+        raise HTTPException(
+            status_code=404,
+            detail=str(e)
+        )

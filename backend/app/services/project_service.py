@@ -20,3 +20,16 @@ class ProjectService:
     @staticmethod
     def get_projects(db: Session, owner_id: int):
         return ProjectRepository.get_all_by_user(db, owner_id)
+    
+    @staticmethod
+    def get_project(db: Session, project_id: int):
+
+        project = ProjectRepository.get_by_id(
+            db,
+            project_id
+        )
+
+        if project is None:
+            raise ValueError("Project not found")
+
+        return project
