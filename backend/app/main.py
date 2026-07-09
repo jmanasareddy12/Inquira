@@ -7,6 +7,10 @@ from app.api.v1.users import router as user_router
 from app.api.v1.projects import router as project_router
 from app.api.v1.documents import router as document_router
 from fastapi.middleware.cors import CORSMiddleware
+from app.api.v1.search import router as search_router
+from app.api.v1.chat import router as chat_router
+
+
 
 app = FastAPI(
     title="Inquira",
@@ -25,6 +29,10 @@ app.include_router(auth_router)
 app.include_router(user_router)
 app.include_router(project_router)
 app.include_router(document_router)
+app.include_router(search_router)
+app.include_router(chat_router)
+
+
 
 @app.get("/")
 def root():

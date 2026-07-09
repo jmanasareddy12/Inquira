@@ -2,6 +2,13 @@ from fastapi import APIRouter, UploadFile, File, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
+from app.dependencies.auth import get_current_user
+
+from app.models.user import User
+
+from app.repositories.project_repository import ProjectRepository
+from app.repositories.document_repository import DocumentRepository
+
 from app.schemas.document import DocumentResponse
 from app.services.document_service import DocumentService
 
@@ -15,8 +22,22 @@ router = APIRouter(
 def upload_document(
     project_id: int,
     file: UploadFile = File(...),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
+    project = ProjectRepository.get_by_id(db, project_id)
+
+    if project is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Project not found"
+        )
+
+    if project.owner_id != current_user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="Access denied"
+        )
 
     return DocumentService.upload_document(
         db=db,
@@ -24,11 +45,27 @@ def upload_document(
         file=file
     )
 
+
 @router.get("/project/{project_id}", response_model=list[DocumentResponse])
 def get_documents(
     project_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
+    project = ProjectRepository.get_by_id(db, project_id)
+
+    if project is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Project not found"
+        )
+
+    if project.owner_id != current_user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="Access denied"
+        )
+
     return DocumentService.get_documents(
         db=db,
         project_id=project_id
@@ -38,16 +75,32 @@ def get_documents(
 @router.delete("/{document_id}")
 def delete_document(
     document_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
-    try:
-        return DocumentService.delete_document(
-            db=db,
-            document_id=document_id
-        )
+    document = DocumentRepository.get_by_id(
+        db,
+        document_id
+    )
 
-    except ValueError as e:
+    if document is None:
         raise HTTPException(
             status_code=404,
-            detail=str(e)
+            detail="Document not found"
         )
+
+    project = ProjectRepository.get_by_id(
+        db,
+        document.project_id
+    )
+
+    if project.owner_id != current_user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="Access denied"
+        )
+
+    return DocumentService.delete_document(
+        db=db,
+        document_id=document_id
+    )

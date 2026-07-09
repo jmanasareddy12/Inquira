@@ -9,6 +9,7 @@ class DocumentResponse(BaseModel):
     file_type: str
     file_size: int
     status: str
+    raw_text: str | None = None
 
     model_config = {
         "from_attributes": True

@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from app.models.document import Document
-
+from app.models.project import Project
 
 class DocumentRepository:
 
@@ -25,6 +25,15 @@ class DocumentRepository:
             db.query(Document)
             .filter(Document.id == document_id)
             .first()
+        )
+    
+    @staticmethod
+    def get_all_by_user(db: Session, owner_id: int):
+        return (
+            db.query(Document)
+            .join(Project)
+            .filter(Project.owner_id == owner_id)
+            .all()
         )
 
     @staticmethod

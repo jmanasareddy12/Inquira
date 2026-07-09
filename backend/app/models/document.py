@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-
+from sqlalchemy import Text
 from app.db.database import Base
 
 
@@ -28,6 +28,8 @@ class Document(Base):
 
     processed = Column(Boolean, default=False)
 
+    raw_text = Column(Text, nullable=True)
+    
     uploaded_at = Column(
         DateTime(timezone=True),
         server_default=func.now()

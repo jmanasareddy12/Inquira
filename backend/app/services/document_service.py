@@ -7,8 +7,8 @@ from sqlalchemy.orm import Session
 
 from app.models.document import Document
 from app.repositories.document_repository import DocumentRepository
-
-
+from app.utils.pdf_utils import extract_text
+from app.services.document_chunk_service import DocumentChunkService
 UPLOAD_FOLDER = "uploads"
 
 
@@ -32,6 +32,7 @@ class DocumentService:
 
         with open(filepath, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
+        raw_text = extract_text(filepath)
 
         document = Document(
             project_id=project_id,
@@ -40,10 +41,22 @@ class DocumentService:
             file_type=file.content_type,
             file_size=os.path.getsize(filepath),
             storage_path=filepath,
-            status="uploaded"
+            status="uploaded",
+            raw_text=raw_text
         )
 
-        return DocumentRepository.create(db, document)
+        saved_document = DocumentRepository.create(
+    db,
+    document
+)
+
+        DocumentChunkService.create_chunks(
+            db=db,
+            document_id=saved_document.id,
+            raw_text=raw_text
+        )
+
+        return saved_document
     @staticmethod
     def get_documents(db: Session, project_id: int):
         return DocumentRepository.get_by_project(
@@ -51,6 +64,12 @@ class DocumentService:
             project_id
         )
 
+    @staticmethod
+    def get_user_documents(db: Session, owner_id: int):
+        return DocumentRepository.get_all_by_user(
+            db,
+            owner_id
+        )
 
     @staticmethod
     def delete_document(db: Session, document_id: int):

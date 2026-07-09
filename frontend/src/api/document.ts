@@ -19,8 +19,8 @@ export async function uploadDocument(
 
   formData.append("file", file);
 
-  const response = await api.post(
-    `/documents/upload/${projectId}`,
+    const response = await api.post(
+    `/documents/${projectId}`,
     formData,
     {
       headers: {
