@@ -44,6 +44,7 @@ class VectorService:
                     id=chunk.id,
                     vector=embedding,
                     payload={
+                        "project_id": chunk.document.project_id,
                         "document_id": chunk.document_id,
                         "chunk_index": chunk.chunk_index,
                         "page_number": chunk.page_number,

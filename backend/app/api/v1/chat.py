@@ -16,5 +16,6 @@ router = APIRouter(
 def chat(request: ChatRequest):
 
     return AIService.ask(
-        request.question
-    )
+    project_id=request.project_id,
+    question=request.question
+)

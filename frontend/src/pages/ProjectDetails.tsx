@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 
 import DashboardLayout from "../components/dashboard/DashboardLayout";
 import UploadDocument from "../components/document/UploadDocument";
+import ChatBox from "../components/chat/ChatBox";
 
 import {
   getDocuments,
@@ -65,80 +66,85 @@ export default function ProjectDetails() {
   };
 
   return (
-    <DashboardLayout>
-      {/* Project Info */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold">
-          {project?.title}
-        </h1>
+  <DashboardLayout>
 
-        <p className="mt-3 text-gray-600">
-          {project?.description}
+    {/* Project Info */}
+    <div className="mb-8">
+      <h1 className="text-4xl font-bold">
+        {project?.title}
+      </h1>
+
+      <p className="mt-3 text-gray-600">
+        {project?.description}
+      </p>
+    </div>
+
+    {/* Upload Component */}
+    <UploadDocument
+      projectId={projectId}
+      onUploadSuccess={loadDocuments}
+    />
+
+    {/* Documents */}
+    <div className="mt-10 rounded-xl border p-8">
+
+      <h2 className="mb-6 text-2xl font-semibold">
+        Documents
+      </h2>
+
+      {documents.length === 0 ? (
+
+        <p className="text-gray-500">
+          No documents uploaded yet.
         </p>
-      </div>
 
-      {/* Upload Component */}
-      <UploadDocument
-        projectId={projectId}
-        onUploadSuccess={loadDocuments}
-      />
+      ) : (
 
-      {/* Documents */}
-      <div className="mt-10 rounded-xl border p-8">
+        <div className="space-y-4">
 
-        <h2 className="mb-6 text-2xl font-semibold">
-          Documents
-        </h2>
+          {documents.map((doc) => (
 
-        {documents.length === 0 ? (
+            <div
+              key={doc.id}
+              className="flex items-center justify-between rounded-lg border p-4"
+            >
 
-          <p className="text-gray-500">
-            No documents uploaded yet.
-          </p>
+              <div>
 
-        ) : (
+                <h3 className="font-semibold">
+                  📄 {doc.original_filename}
+                </h3>
 
-          <div className="space-y-4">
+                <p className="text-sm text-gray-500">
+                  Status: {doc.status}
+                </p>
 
-            {documents.map((doc) => (
-
-              <div
-                key={doc.id}
-                className="flex items-center justify-between rounded-lg border p-4"
-              >
-
-                <div>
-
-                  <h3 className="font-semibold">
-                    📄 {doc.original_filename}
-                  </h3>
-
-                  <p className="text-sm text-gray-500">
-                    Status: {doc.status}
-                  </p>
-
-                  <p className="text-sm text-gray-500">
-                    {(doc.file_size / 1024).toFixed(2)} KB
-                  </p>
-
-                </div>
-
-                <button
-                  onClick={() => handleDelete(doc.id)}
-                  className="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
-                >
-                  Delete
-                </button>
+                <p className="text-sm text-gray-500">
+                  {(doc.file_size / 1024).toFixed(2)} KB
+                </p>
 
               </div>
 
-            ))}
+              <button
+                onClick={() => handleDelete(doc.id)}
+                className="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
+              >
+                Delete
+              </button>
 
-          </div>
+            </div>
 
-        )}
+          ))}
 
-      </div>
-    </DashboardLayout>
-  );
+        </div>
+
+      )}
+
+    </div>
+
+    {/* AI Chat */}
+    <ChatBox projectId={projectId} />
+
+  </DashboardLayout>
+);
 }

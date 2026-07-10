@@ -5,9 +5,13 @@ from app.services.search_service import SearchService
 class AIService:
 
     @staticmethod
-    def ask(question: str):
+    def ask(
+        project_id: int,
+        question: str
+    ):
 
         results = SearchService.search(
+            project_id=project_id,
             query=question,
             limit=5
         )
