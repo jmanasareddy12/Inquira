@@ -23,4 +23,9 @@ class ProjectRepository:
             .first()
         )
     
+    @staticmethod
+    def delete(db: Session, project):
+
+        db.delete(project)
+        db.commit()
     

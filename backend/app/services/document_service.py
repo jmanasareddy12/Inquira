@@ -4,11 +4,13 @@ from uuid import uuid4
 
 from fastapi import UploadFile
 from sqlalchemy.orm import Session
-
+from app.services.vector_service import VectorService
 from app.models.document import Document
 from app.repositories.document_repository import DocumentRepository
 from app.utils.pdf_utils import extract_text
 from app.services.document_chunk_service import DocumentChunkService
+from app.services.s3_service import S3Service
+
 UPLOAD_FOLDER = "uploads"
 
 
@@ -30,9 +32,27 @@ class DocumentService:
             filename
         )
 
+        # Read uploaded file into memory
+        file_bytes = file.file.read()
+
+        # Upload to S3
+        s3_key = f"projects/{project_id}/{filename}"
+
+        S3Service.upload_file(
+            file_bytes=file_bytes,
+            key=s3_key,
+            content_type=file.content_type,
+        )
+
+        # Save temporarily for text extraction
         with open(filepath, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-        raw_text = extract_text(filepath)
+            buffer.write(file_bytes)
+
+        pages = extract_text(filepath)
+
+        raw_text = "\n".join(
+            page["text"] for page in pages
+        )
 
         document = Document(
             project_id=project_id,
@@ -40,7 +60,7 @@ class DocumentService:
             original_filename=file.filename,
             file_type=file.content_type,
             file_size=os.path.getsize(filepath),
-            storage_path=filepath,
+            storage_path=s3_key,
             status="uploaded",
             raw_text=raw_text
         )
@@ -53,7 +73,7 @@ class DocumentService:
         DocumentChunkService.create_chunks(
             db=db,
             document_id=saved_document.id,
-            raw_text=raw_text
+            pages=pages
         )
 
         return saved_document
@@ -82,6 +102,16 @@ class DocumentService:
         if not document:
             raise ValueError("Document not found")
 
+        # Try deleting vectors from Qdrant
+        try:
+            S3Service.delete_file(
+                document.storage_path
+            )
+            VectorService.delete_document_vectors(document_id)
+        except Exception as e:
+            print("Qdrant delete skipped:", e)
+
+        # Always delete from PostgreSQL
         DocumentRepository.delete(db, document)
 
         return {

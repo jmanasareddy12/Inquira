@@ -2,6 +2,10 @@ from qdrant_client.models import (
     Distance,
     VectorParams,
     PointStruct,
+    PayloadSchemaType,
+    Filter,
+    FieldCondition,
+    MatchValue,
 )
 
 from app.core.qdrant import client
@@ -24,6 +28,8 @@ class VectorService:
 
         if COLLECTION_NAME not in existing:
 
+            print("Creating Qdrant collection...")
+
             client.create_collection(
                 collection_name=COLLECTION_NAME,
                 vectors_config=VectorParams(
@@ -32,8 +38,29 @@ class VectorService:
                 ),
             )
 
+            client.create_payload_index(
+                collection_name=COLLECTION_NAME,
+                field_name="project_id",
+                field_schema=PayloadSchemaType.INTEGER,
+            )
+
+            print("Collection created successfully.")
+
+        else:
+
+            try:
+                client.create_payload_index(
+                    collection_name=COLLECTION_NAME,
+                    field_name="project_id",
+                    field_schema=PayloadSchemaType.INTEGER,
+                )
+            except Exception:
+                pass
+
     @staticmethod
     def index_chunk(chunk):
+
+        VectorService.create_collection()
 
         embedding = get_embedding(chunk.content)
 
@@ -53,3 +80,21 @@ class VectorService:
                 )
             ],
         )
+
+
+        @staticmethod
+        def delete_document_vectors(document_id: int):
+
+            client.delete(
+                collection_name=COLLECTION_NAME,
+                points_selector=Filter(
+                    must=[
+                        FieldCondition(
+                            key="document_id",
+                            match=MatchValue(value=document_id),
+                        )
+                    ]
+                ),
+            )
+
+            print(f"Deleted vectors for document {document_id}")

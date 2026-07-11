@@ -1,5 +1,7 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 
+from app.db.session import get_db
 from app.schemas.chat import ChatRequest, ChatResponse
 from app.services.ai_service import AIService
 
@@ -13,9 +15,13 @@ router = APIRouter(
     "",
     response_model=ChatResponse
 )
-def chat(request: ChatRequest):
+def chat(
+    request: ChatRequest,
+    db: Session = Depends(get_db),
+):
 
     return AIService.ask(
-    project_id=request.project_id,
-    question=request.question
-)
+        db=db,
+        project_id=request.project_id,
+        question=request.question,
+    )

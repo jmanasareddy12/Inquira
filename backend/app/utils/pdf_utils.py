@@ -1,22 +1,28 @@
 import fitz
 
 
-def extract_text(pdf_path: str):
+def extract_text(filepath):
+    doc = fitz.open(filepath)
 
-    doc = fitz.open(pdf_path)
+    pages = []
 
-    text = ""
+    total_text = ""
 
-    for i, page in enumerate(doc):
+    for page_number, page in enumerate(doc, start=1):
 
-        page_text = page.get_text()
+        text = page.get_text()
 
-        print(f"Page {i+1}: {len(page_text)} characters")
+        print(f"Page {page_number}: {len(text)} characters")
 
-        text += page_text
+        pages.append(
+            {
+                "page_number": page_number,
+                "text": text,
+            }
+        )
 
-    doc.close()
+        total_text += text
 
-    print("Total characters:", len(text))
+    print(f"Total characters: {len(total_text)}")
 
-    return text
+    return pages

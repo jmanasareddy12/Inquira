@@ -1,19 +1,23 @@
 from app.core.gemini import client
 from app.services.search_service import SearchService
-
+from sqlalchemy.orm import Session
 
 class AIService:
 
     @staticmethod
+    
+
     def ask(
+        db: Session,
         project_id: int,
-        question: str
+        question: str,
     ):
 
         results = SearchService.search(
+            db=db,
             project_id=project_id,
             query=question,
-            limit=5
+            limit=5,
         )
 
         context = "\n\n".join(
@@ -40,7 +44,9 @@ Question:
             model="gemini-2.5-flash",
             contents=prompt,
         )
-
+        print("=" * 80)
+        print(results)
+        print("=" * 80)
         return {
             "answer": response.text,
             "sources": results

@@ -33,3 +33,23 @@ class ProjectService:
             raise ValueError("Project not found")
 
         return project
+    
+    @staticmethod
+    def delete_project(db: Session, project_id: int):
+
+        project = ProjectRepository.get_by_id(
+            db,
+            project_id
+        )
+
+        if not project:
+            raise ValueError("Project not found")
+
+        ProjectRepository.delete(
+            db,
+            project
+        )
+
+        return {
+            "message": "Project deleted successfully"
+        }

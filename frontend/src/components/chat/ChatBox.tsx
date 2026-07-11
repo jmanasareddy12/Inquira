@@ -175,43 +175,35 @@ export default function ChatBox({
           </h3>
 
           {sources.map((source, index) => (
+  <div
+    key={index}
+    className="mb-4 rounded-lg border bg-white p-4 shadow-sm"
+  >
+    <h4 className="font-semibold text-indigo-700">
+      📄 {source.filename}
+    </h4>
 
-            <div
-              key={index}
-              className="mb-3 rounded-lg border bg-white p-3"
-            >
+    <div className="mt-2 flex flex-wrap gap-4 text-sm text-gray-600">
+      <span>
+        📄 Page: {source.page_number ?? "Unknown"}
+      </span>
 
-              <p>
+      <span>
+        📑 Chunk: {source.chunk_index}
+      </span>
 
-                <strong>Document ID:</strong>{" "}
+      <span>
+        ⭐ Similarity: {(source.score * 100).toFixed(1)}%
+      </span>
+    </div>
 
-                {source.document_id}
-
-              </p>
-
-              <p>
-
-                <strong>Chunk:</strong>{" "}
-
-                {source.chunk_index}
-
-              </p>
-
-              {source.page_number && (
-
-                <p>
-
-                  <strong>Page:</strong>{" "}
-
-                  {source.page_number}
-
-                </p>
-
-              )}
-
-            </div>
-
-          ))}
+    <div className="mt-3 rounded bg-gray-50 p-3 text-sm text-gray-700">
+      {source.content.length > 250
+        ? source.content.substring(0, 250) + "..."
+        : source.content}
+    </div>
+  </div>
+))}
 
         </div>
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 import DashboardLayout from "../components/dashboard/DashboardLayout";
 import UploadDocument from "../components/document/UploadDocument";
@@ -13,6 +13,7 @@ import {
 
 import {
   getProject,
+  deleteProject,
   type Project,
 } from "../api/project";
 
@@ -20,6 +21,8 @@ export default function ProjectDetails() {
   const { id } = useParams();
 
   const projectId = Number(id);
+
+  const navigate = useNavigate();
 
   const [project, setProject] = useState<Project | null>(null);
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -36,16 +39,16 @@ export default function ProjectDetails() {
 
   // Load Documents
   const loadDocuments = async () => {
-  try {
-    const data = await getDocuments(projectId);
+    try {
+      const data = await getDocuments(projectId);
 
-    console.log("Documents:", data);
+      console.log("Documents:", data);
 
-    setDocuments(data);
-  } catch (error) {
-    console.error(error);
-  }
-};
+      setDocuments(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   useEffect(() => {
     if (!projectId) return;
@@ -65,86 +68,126 @@ export default function ProjectDetails() {
     }
   };
 
+  // Delete Project
+  const handleDeleteProject = async () => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this project?\n\nThis will permanently delete the project and all uploaded documents."
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await deleteProject(projectId);
+
+      alert("Project deleted successfully.");
+
+      navigate("/dashboard");
+    } catch (error) {
+      console.error(error);
+      alert("Failed to delete project");
+    }
+  };
+
   return (
-  <DashboardLayout>
+    <DashboardLayout>
 
-    {/* Project Info */}
-    <div className="mb-8">
-      <h1 className="text-4xl font-bold">
-        {project?.title}
-      </h1>
+      {/* Project Info */}
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold">
+          {project?.title}
+        </h1>
 
-      <p className="mt-3 text-gray-600">
-        {project?.description}
-      </p>
-    </div>
-
-    {/* Upload Component */}
-    <UploadDocument
-      projectId={projectId}
-      onUploadSuccess={loadDocuments}
-    />
-
-    {/* Documents */}
-    <div className="mt-10 rounded-xl border p-8">
-
-      <h2 className="mb-6 text-2xl font-semibold">
-        Documents
-      </h2>
-
-      {documents.length === 0 ? (
-
-        <p className="text-gray-500">
-          No documents uploaded yet.
+        <p className="mt-3 text-gray-600">
+          {project?.description}
         </p>
+      </div>
 
-      ) : (
+      {/* Upload */}
+      <UploadDocument
+        projectId={projectId}
+        onUploadSuccess={loadDocuments}
+      />
 
-        <div className="space-y-4">
+      {/* Documents */}
+      <div className="mt-10 rounded-xl border p-8">
 
-          {documents.map((doc) => (
+        <h2 className="mb-6 text-2xl font-semibold">
+          Documents
+        </h2>
 
-            <div
-              key={doc.id}
-              className="flex items-center justify-between rounded-lg border p-4"
-            >
+        {documents.length === 0 ? (
 
-              <div>
+          <p className="text-gray-500">
+            No documents uploaded yet.
+          </p>
 
-                <h3 className="font-semibold">
-                  📄 {doc.original_filename}
-                </h3>
+        ) : (
 
-                <p className="text-sm text-gray-500">
-                  Status: {doc.status}
-                </p>
+          <div className="space-y-4">
 
-                <p className="text-sm text-gray-500">
-                  {(doc.file_size / 1024).toFixed(2)} KB
-                </p>
+            {documents.map((doc) => (
+
+              <div
+                key={doc.id}
+                className="flex items-center justify-between rounded-lg border p-4"
+              >
+
+                <div>
+
+                  <h3 className="font-semibold">
+                    📄 {doc.original_filename}
+                  </h3>
+
+                  <p className="text-sm text-gray-500">
+                    Status: {doc.status}
+                  </p>
+
+                  <p className="text-sm text-gray-500">
+                    {(doc.file_size / 1024).toFixed(2)} KB
+                  </p>
+
+                </div>
+
+                <button
+                  onClick={() => handleDelete(doc.id)}
+                  className="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
+                >
+                  Delete
+                </button>
 
               </div>
 
-              <button
-                onClick={() => handleDelete(doc.id)}
-                className="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
-              >
-                Delete
-              </button>
+            ))}
 
-            </div>
+          </div>
 
-          ))}
+        )}
 
-        </div>
+      </div>
 
-      )}
+      {/* AI Chat */}
+      <ChatBox projectId={projectId} />
 
-    </div>
+      {/* Delete Project */}
+      <div className="mt-10 border-t pt-8">
 
-    {/* AI Chat */}
-    <ChatBox projectId={projectId} />
+        <h2 className="mb-3 text-xl font-semibold text-red-600">
+          Danger Zone
+        </h2>
 
-  </DashboardLayout>
-);
+        <p className="mb-5 text-gray-600">
+          Deleting this project will permanently remove the project and all of its uploaded documents.
+        </p>
+
+        <button
+          onClick={handleDeleteProject}
+          className="rounded-lg bg-red-600 px-6 py-3 text-white transition hover:bg-red-700"
+        >
+          🗑 Delete Project
+        </button>
+
+      </div>
+
+    </DashboardLayout>
+  );
 }

@@ -14,33 +14,48 @@ class DocumentChunkService:
     def create_chunks(
         db: Session,
         document_id: int,
-        raw_text: str,
+        pages: list,
     ):
 
         # Create collection if it doesn't exist
         VectorService.create_collection()
 
-        # Split text into chunks
-        chunks = chunk_text(raw_text)
-
-        print("=" * 60)
-        print(f"Document ID      : {document_id}")
-        print(f"Raw Text Length  : {len(raw_text)}")
-        print(f"Chunks Generated : {len(chunks)}")
 
         objects = []
 
-        for index, chunk in enumerate(chunks):
+        chunk_index = 0
 
-            objects.append(
-                DocumentChunk(
+        for page in pages:
+            print("=" * 50)
+            print(page)
+            print(type(page))
+            print("page_number =", page.get("page_number"))
+            page_chunks = chunk_text(page["text"])
+
+            print(
+                f"Page {page['page_number']} -> {len(page_chunks)} chunks"
+            )
+
+            for chunk in page_chunks:
+
+                print(
+                    f"Creating chunk {chunk_index} | Page = {page['page_number']}"
+                )
+                chunk_obj = DocumentChunk(
                     document_id=document_id,
-                    chunk_index=index,
-                    page_number=None,
+                    chunk_index=chunk_index,
+                    page_number=page["page_number"],
                     content=chunk,
                     token_count=len(chunk.split()),
                 )
-            )
+
+                print("Chunk object page_number:", chunk_obj.page_number)
+
+                objects.append(chunk_obj)
+
+                
+
+                chunk_index += 1
 
         print("Saving chunks to PostgreSQL...")
 
@@ -48,13 +63,25 @@ class DocumentChunkService:
             db,
             objects
         )
+        print("After save:")
 
+        for chunk in objects[:5]:
+            print(
+                f"Chunk {chunk.chunk_index} -> page_number = {chunk.page_number}"
+            )
         print(f"{len(objects)} chunks saved successfully.")
 
         print("Generating embeddings and indexing into Qdrant...")
 
         for chunk in objects:
-            VectorService.index_chunk(chunk)
+            try:
+                VectorService.index_chunk(chunk)
+                print(f"Indexed chunk {chunk.chunk_index}")
+            except Exception as e:
+                print(f"ERROR indexing chunk {chunk.chunk_index}")
+                print(type(e))
+                print(e)
+                raise
 
         print(f"{len(objects)} vectors indexed successfully.")
 

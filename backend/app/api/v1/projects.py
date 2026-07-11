@@ -6,6 +6,7 @@ from app.dependencies.auth import get_current_user
 from app.models.user import User
 from app.schemas.project import ProjectCreate, ProjectResponse
 from app.services.project_service import ProjectService
+from app.repositories.project_repository import ProjectRepository
 
 router = APIRouter(
     prefix="/projects",
@@ -63,3 +64,32 @@ def get_project(
             status_code=404,
             detail=str(e)
         )
+    
+@router.delete("/{project_id}")
+def delete_project(
+    project_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+
+    project = ProjectRepository.get_by_id(
+        db,
+        project_id
+    )
+
+    if project is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Project not found"
+        )
+
+    if project.owner_id != current_user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="Access denied"
+        )
+
+    return ProjectService.delete_project(
+        db=db,
+        project_id=project_id
+    )
