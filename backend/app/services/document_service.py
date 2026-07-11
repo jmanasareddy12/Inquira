@@ -117,3 +117,25 @@ class DocumentService:
         return {
             "message": "Document deleted successfully"
         }
+    
+    @staticmethod
+    def get_document_url(
+        db: Session,
+        document_id: int,
+    ):
+
+        document = DocumentRepository.get_by_id(
+            db,
+            document_id
+        )
+
+        if not document:
+            raise ValueError("Document not found")
+
+        url = S3Service.generate_view_url(
+            document.storage_path
+        )
+
+        return {
+            "url": url
+        }

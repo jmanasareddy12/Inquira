@@ -104,3 +104,39 @@ def delete_document(
         db=db,
         document_id=document_id
     )
+
+@router.get("/{document_id}/view")
+def view_document(
+    document_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+
+    document = DocumentRepository.get_by_id(
+        db,
+        document_id
+    )
+
+    if document is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Document not found"
+        )
+
+    project = ProjectRepository.get_by_id(
+        db,
+        document.project_id
+    )
+
+    if project.owner_id != current_user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="Access denied"
+        )
+
+    return DocumentService.get_document_url(
+        db=db,
+        document_id=document_id,
+    )
+
+

@@ -8,6 +8,7 @@ import ChatBox from "../components/chat/ChatBox";
 import {
   getDocuments,
   deleteDocument,
+  viewDocument,
   type Document,
 } from "../api/document";
 
@@ -67,6 +68,17 @@ export default function ProjectDetails() {
       alert("Failed to delete document");
     }
   };
+
+  const handleView = async (documentId: number) => {
+  try {
+    const response = await viewDocument(documentId);
+
+    window.open(response.url, "_blank");
+  } catch (error) {
+    console.error(error);
+    alert("Failed to open PDF");
+  }
+};
 
   // Delete Project
   const handleDeleteProject = async () => {
@@ -148,12 +160,23 @@ export default function ProjectDetails() {
 
                 </div>
 
-                <button
-                  onClick={() => handleDelete(doc.id)}
-                  className="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
-                >
-                  Delete
-                </button>
+                <div className="flex gap-2">
+
+  <button
+    onClick={() => handleView(doc.id)}
+    className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+  >
+    👁 View
+  </button>
+
+  <button
+    onClick={() => handleDelete(doc.id)}
+    className="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
+  >
+    🗑 Delete
+  </button>
+
+</div>
 
               </div>
 

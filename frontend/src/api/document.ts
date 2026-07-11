@@ -45,3 +45,11 @@ export async function getDocuments(projectId: number) {
 export async function deleteDocument(id: number) {
   await api.delete(`/documents/${id}`);
 }
+
+export async function viewDocument(documentId: number) {
+  const response = await api.get(
+    `/documents/${documentId}/view`
+  );
+
+  return response.data;
+}
