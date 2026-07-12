@@ -113,7 +113,7 @@ Inquira/
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/<your-username>/Inquira.git
+git clone https://github.com/jmanasareddy12/Inquira.git
 cd Inquira
 ```
 
