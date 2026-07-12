@@ -1,32 +1,49 @@
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
 export default function Sidebar() {
   return (
-    <aside className="w-64 bg-slate-900 text-white min-h-screen p-6">
+    <aside className="w-64 min-h-screen bg-slate-900 p-6 text-white">
 
-      <h1 className="text-3xl font-bold mb-10">
+      <h1 className="mb-10 text-3xl font-bold">
         Inquira
       </h1>
 
-      <nav className="space-y-4">
+      <nav className="space-y-2">
 
-        <Link to="/dashboard">📁 Projects</Link>
+        <NavLink
+          to="/dashboard"
+          className="block rounded-lg px-4 py-3 hover:bg-slate-800"
+        >
+          🏠 Dashboard
+        </NavLink>
 
-        <br />
+        <NavLink
+          to="/documents"
+          className="block rounded-lg px-4 py-3 hover:bg-slate-800"
+        >
+          📄 Documents
+        </NavLink>
 
-        <Link to="/documents">📄 Documents</Link>
+        <NavLink
+          to="/chat"
+          className="block rounded-lg px-4 py-3 hover:bg-slate-800"
+        >
+          💬 AI Chat
+        </NavLink>
 
-        <br />
+        <NavLink
+          to="/search"
+          className="block rounded-lg px-4 py-3 hover:bg-slate-800"
+        >
+          🔍 Search
+        </NavLink>
 
-        <Link to="/chat">💬 AI Chat</Link>
-
-        <br />
-
-        <Link to="/search">🔍 Search</Link>
-
-        <br />
-
-        <Link to="/summary">⭐ Summaries</Link>
+        <NavLink
+          to="/summaries"
+          className="block rounded-lg px-4 py-3 hover:bg-slate-800"
+        >
+          ⭐ Summaries
+        </NavLink>
 
       </nav>
 

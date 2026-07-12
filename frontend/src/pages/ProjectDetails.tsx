@@ -9,6 +9,7 @@ import {
   getDocuments,
   deleteDocument,
   viewDocument,
+  downloadDocument,
   type Document,
 } from "../api/document";
 
@@ -69,16 +70,27 @@ export default function ProjectDetails() {
     }
   };
 
+  // View Document
   const handleView = async (documentId: number) => {
-  try {
-    const response = await viewDocument(documentId);
+    try {
+      const response = await viewDocument(documentId);
+      window.open(response.url, "_blank");
+    } catch (error) {
+      console.error(error);
+      alert("Failed to open PDF");
+    }
+  };
 
-    window.open(response.url, "_blank");
-  } catch (error) {
-    console.error(error);
-    alert("Failed to open PDF");
-  }
-};
+  // Download Document
+  const handleDownload = async (documentId: number) => {
+    try {
+      const data = await downloadDocument(documentId);
+      window.open(data.url, "_blank");
+    } catch (error) {
+      console.error(error);
+      alert("Failed to download document");
+    }
+  };
 
   // Delete Project
   const handleDeleteProject = async () => {
@@ -102,12 +114,9 @@ export default function ProjectDetails() {
 
   return (
     <DashboardLayout>
-
       {/* Project Info */}
       <div className="mb-8">
-        <h1 className="text-4xl font-bold">
-          {project?.title}
-        </h1>
+        <h1 className="text-4xl font-bold">{project?.title}</h1>
 
         <p className="mt-3 text-gray-600">
           {project?.description}
@@ -122,30 +131,22 @@ export default function ProjectDetails() {
 
       {/* Documents */}
       <div className="mt-10 rounded-xl border p-8">
-
         <h2 className="mb-6 text-2xl font-semibold">
           Documents
         </h2>
 
         {documents.length === 0 ? (
-
           <p className="text-gray-500">
             No documents uploaded yet.
           </p>
-
         ) : (
-
           <div className="space-y-4">
-
             {documents.map((doc) => (
-
               <div
                 key={doc.id}
                 className="flex items-center justify-between rounded-lg border p-4"
               >
-
                 <div>
-
                   <h3 className="font-semibold">
                     📄 {doc.original_filename}
                   </h3>
@@ -157,35 +158,34 @@ export default function ProjectDetails() {
                   <p className="text-sm text-gray-500">
                     {(doc.file_size / 1024).toFixed(2)} KB
                   </p>
-
                 </div>
 
                 <div className="flex gap-2">
+                  <button
+                    onClick={() => handleView(doc.id)}
+                    className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+                  >
+                    👁 View
+                  </button>
 
-  <button
-    onClick={() => handleView(doc.id)}
-    className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-  >
-    👁 View
-  </button>
+                  <button
+                    onClick={() => handleDownload(doc.id)}
+                    className="rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600"
+                  >
+                    ⬇ Download
+                  </button>
 
-  <button
-    onClick={() => handleDelete(doc.id)}
-    className="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
-  >
-    🗑 Delete
-  </button>
-
-</div>
-
+                  <button
+                    onClick={() => handleDelete(doc.id)}
+                    className="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
+                  >
+                    🗑 Delete
+                  </button>
+                </div>
               </div>
-
             ))}
-
           </div>
-
         )}
-
       </div>
 
       {/* AI Chat */}
@@ -193,13 +193,13 @@ export default function ProjectDetails() {
 
       {/* Delete Project */}
       <div className="mt-10 border-t pt-8">
-
         <h2 className="mb-3 text-xl font-semibold text-red-600">
           Danger Zone
         </h2>
 
         <p className="mb-5 text-gray-600">
-          Deleting this project will permanently remove the project and all of its uploaded documents.
+          Deleting this project will permanently remove the project and all of
+          its uploaded documents.
         </p>
 
         <button
@@ -208,9 +208,7 @@ export default function ProjectDetails() {
         >
           🗑 Delete Project
         </button>
-
       </div>
-
     </DashboardLayout>
   );
 }

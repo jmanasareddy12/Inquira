@@ -44,7 +44,16 @@ def upload_document(
         project_id=project_id,
         file=file
     )
+@router.get("/", response_model=list[DocumentResponse])
+def get_user_documents(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
 
+    return DocumentService.get_user_documents(
+        db=db,
+        owner_id=current_user.id,
+    )
 
 @router.get("/project/{project_id}", response_model=list[DocumentResponse])
 def get_documents(
@@ -140,3 +149,36 @@ def view_document(
     )
 
 
+@router.get("/{document_id}/download")
+def download_document(
+    document_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+
+    document = DocumentRepository.get_by_id(
+        db,
+        document_id
+    )
+
+    if document is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Document not found"
+        )
+
+    project = ProjectRepository.get_by_id(
+        db,
+        document.project_id
+    )
+
+    if project.owner_id != current_user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="Access denied"
+        )
+
+    return DocumentService.get_document_download_url(
+        db=db,
+        document_id=document_id,
+    )

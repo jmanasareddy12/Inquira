@@ -40,7 +40,13 @@ export async function getDocuments(projectId: number) {
 
   return response.data;
 }
+export async function getAllDocuments() {
+  const response = await api.get<Document[]>(
+    "/documents"
+  );
 
+  return response.data;
+}
 // Delete document
 export async function deleteDocument(id: number) {
   await api.delete(`/documents/${id}`);
@@ -49,6 +55,14 @@ export async function deleteDocument(id: number) {
 export async function viewDocument(documentId: number) {
   const response = await api.get(
     `/documents/${documentId}/view`
+  );
+
+  return response.data;
+}
+
+export async function downloadDocument(documentId: number) {
+  const response = await api.get(
+    `/documents/${documentId}/download`
   );
 
   return response.data;
