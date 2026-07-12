@@ -50,3 +50,10 @@ class Document(Base):
         back_populates="document",
         cascade="all, delete-orphan"
     )
+
+    summary = relationship(
+        "Summary",
+        back_populates="document",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
