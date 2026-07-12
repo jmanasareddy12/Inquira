@@ -86,8 +86,8 @@ export default function Documents() {
                 </h2>
 
                 <p className="text-sm text-gray-500">
-                  Project ID: {doc.project_id}
-                </p>
+  📁 {doc.project_name}
+</p>
 
                 <p className="text-sm text-gray-500">
                   {(doc.file_size / 1024).toFixed(2)} KB

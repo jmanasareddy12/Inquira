@@ -2,11 +2,16 @@ import api from "./axios";
 
 export interface Document {
   id: number;
+
   project_id: number;
+  project_name: string;
+
   filename: string;
   original_filename: string;
+
   file_type: string;
   file_size: number;
+
   status: string;
 }
 

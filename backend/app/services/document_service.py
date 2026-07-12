@@ -85,12 +85,35 @@ class DocumentService:
         )
 
     @staticmethod
-    def get_user_documents(db: Session, owner_id: int):
-        return DocumentRepository.get_all_by_user(
+    def get_user_documents(
+        db: Session,
+        owner_id: int,
+    ):
+
+        documents = DocumentRepository.get_all_by_user(
             db,
-            owner_id
+            owner_id,
         )
 
+        response = []
+
+        for document in documents:
+
+            response.append(
+                {
+                    "id": document.id,
+                    "project_id": document.project_id,
+                    "project_name": document.project.title,
+                    "filename": document.filename,
+                    "original_filename": document.original_filename,
+                    "file_type": document.file_type,
+                    "file_size": document.file_size,
+                    "status": document.status,
+                    "raw_text": document.raw_text,
+                }
+            )
+
+        return response
     @staticmethod
     def delete_document(db: Session, document_id: int):
 
