@@ -77,23 +77,42 @@ export default function Search() {
 
       <div className="space-y-4">
 
-        {results.map((result, index) => (
+       {results.map((result, index) => (
 
-          <div
-            key={index}
-            className="rounded-lg border bg-white p-5 shadow"
-          >
+  <div
+    key={index}
+    className="rounded-xl border bg-white p-6 shadow-sm"
+  >
 
-            <pre className="whitespace-pre-wrap text-sm">
+    <div className="flex items-center justify-between">
 
-              {JSON.stringify(result, null, 2)}
+      <div>
 
-            </pre>
+        <h2 className="text-lg font-semibold">
+          📄 {result.filename}
+        </h2>
 
-          </div>
+        <p className="mt-1 text-sm text-gray-500">
+          Page {result.page_number}
+        </p>
 
-        ))}
+      </div>
 
+      <span className="rounded-full bg-green-100 px-3 py-1 text-sm text-green-700">
+        {(result.score * 100).toFixed(1)}%
+      </span>
+
+    </div>
+
+    <p className="mt-5 leading-7 text-gray-700">
+
+      {result.content}
+
+    </p>
+
+  </div>
+
+))}
       </div>
 
     </DashboardLayout>
