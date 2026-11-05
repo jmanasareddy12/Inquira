@@ -18,10 +18,23 @@ app = FastAPI(
 )
 app.add_middleware(
     CORSMiddleware,
+    import os
+
+frontend_url = os.getenv(
+    "FRONTEND_URL",
+    "https://inquira-alpha.vercel.app"
+).rstrip("/")
+
+app.add_middleware(
+    CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
-        "http://16.171.66.112",
+        frontend_url,
     ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
