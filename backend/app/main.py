@@ -1,24 +1,25 @@
-from fastapi import FastAPI
+
+import os
+
+from fastapi import FastAPI, HTTPException
 from sqlalchemy import text
+from fastapi.middleware.cors import CORSMiddleware
+
 import app.models
 from app.api.v1.auth import router as auth_router
-from app.db.database import engine
 from app.api.v1.users import router as user_router
 from app.api.v1.projects import router as project_router
 from app.api.v1.documents import router as document_router
-from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.search import router as search_router
 from app.api.v1.chat import router as chat_router
 from app.api.v1 import summaries
+from app.db.database import engine
 
 
 app = FastAPI(
     title="Inquira",
     version="1.0.0"
 )
-app.add_middleware(
-    CORSMiddleware,
-    import os
 
 frontend_url = os.getenv(
     "FRONTEND_URL",
@@ -35,10 +36,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+
 app.include_router(auth_router)
 app.include_router(user_router)
 app.include_router(project_router)
@@ -50,7 +48,7 @@ app.include_router(summaries.router)
 
 @app.get("/")
 def root():
-    return {"message": "Welcome to Inquira "}
+    return {"message": "Welcome to Inquira"}
 
 
 @app.get("/health/db")
@@ -58,12 +56,14 @@ def database_health():
     try:
         with engine.connect() as connection:
             connection.execute(text("SELECT 1"))
+
         return {
             "status": "success",
             "database": "Connected"
         }
-    except Exception as e:
-        return {
-            "status": "failed",
-            "error": str(e)
-        }
+
+    except Exception:
+        raise HTTPException(
+            status_code=503,
+            detail="Database connection failed"
+        )
